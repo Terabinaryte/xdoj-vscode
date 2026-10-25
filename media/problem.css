@@ -1,0 +1,416 @@
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-editor-foreground);
+  background: var(--vscode-editor-background);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- 顶部工具栏 ---------- */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  background: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex: 0 0 auto;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.problem-id {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.85em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--vscode-badge-background, rgba(128, 128, 128, 0.25));
+  color: var(--vscode-badge-foreground, inherit);
+  flex: 0 0 auto;
+}
+
+.problem-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.limits {
+  font-size: 0.82em;
+  opacity: 0.65;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.toolbar-right,
+.pdf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.status {
+  font-size: 0.82em;
+  opacity: 0.8;
+  margin-right: 4px;
+}
+
+.status.error {
+  color: var(--vscode-errorForeground, #f48771);
+  opacity: 1;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.85em;
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+  background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.18));
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--vscode-button-secondaryHoverBackground, rgba(128, 128, 128, 0.3));
+}
+
+button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+button.primary {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+button.primary:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+/* ---------- PDF 工具条 ---------- */
+
+.pdf-toolbar {
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.25));
+  background: var(--vscode-editor-background);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+.pdf-toolbar .sep {
+  width: 1px;
+  height: 16px;
+  background: var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  margin: 0 4px;
+}
+
+.page-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85em;
+}
+
+.page-indicator input {
+  width: 3.4em;
+  text-align: center;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, rgba(128, 128, 128, 0.35));
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+.zoom-label {
+  font-size: 0.85em;
+  min-width: 3.2em;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85em;
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+/* ---------- 内容区 ---------- */
+
+.content {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 20px 24px 60px;
+}
+
+.content.no-padding {
+  padding: 0;
+}
+
+.placeholder {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* 纯文本题面 */
+pre.statement-text {
+  margin: 0 auto;
+  max-width: 100ch;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: var(--vscode-editor-font-size, 13px);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  tab-size: 4;
+}
+
+/* 内联 HTML 题面 */
+.statement-html {
+  max-width: 88ch;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+.statement-html h1,
+.statement-html h2,
+.statement-html h3 {
+  line-height: 1.3;
+  margin: 1.2em 0 0.5em;
+}
+
+.statement-html h2 {
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  padding-bottom: 0.25em;
+}
+
+.statement-html p,
+.statement-html ul,
+.statement-html ol {
+  margin: 0.6em 0;
+}
+
+.statement-html .meta,
+.statement-html .hint {
+  font-size: 0.88em;
+  opacity: 0.7;
+}
+
+.statement-html code {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.92em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.18));
+}
+
+.statement-html pre {
+  font-family: var(--vscode-editor-font-family, monospace);
+  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.12));
+  border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  padding: 10px 12px;
+  overflow: auto;
+  white-space: pre;
+}
+
+.statement-html img {
+  max-width: 100%;
+  height: auto;
+}
+
+.statement-html table {
+  border-collapse: collapse;
+}
+
+.statement-html th,
+.statement-html td {
+  border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  padding: 4px 8px;
+}
+
+/* ---------- PDF 页面 ---------- */
+
+/* PDF 的滚动容器是 #content（overflow: auto），这里只负责排版。 */
+.pdf-host {
+  /* 让 #content 成为横向滚动的那个盒子，而不是把自己撑宽。 */
+  min-width: 0;
+}
+
+.pdf-container {
+  display: flex;
+  flex-direction: column;
+  /*
+   * 这里**不能**用 align-items: center。
+   *
+   * 放大到比可视区还宽时（比如 200%），居中会把溢出**平分到左右两侧**，
+   * 而 scrollLeft 不能为负 —— 左边那半页永远滚不到，看起来就是「页面被切掉一半
+   * 而且横向滚动条拖不过去」。改成贴左对齐，全靠 .pdf-page 的 auto margin 居中：
+   * 放得下时 auto margin 吸收剩余空间（居中），放不下时按规范退化成 0，
+   * 内容从左边开始排、右边溢出，横向滚动条就能一路拖到最左。
+   */
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 24px 40px;
+}
+
+.pdf-page {
+  position: relative;
+  /* 居中靠它，而不是靠 align-items: center（原因见上）。 */
+  margin: 0 auto;
+  line-height: 0;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pdf-page canvas {
+  display: block;
+}
+
+.pdf-page-number {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: #444;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.pdf-page.single-hidden {
+  display: none;
+}
+
+/* ---------- DOCX ---------- */
+
+.docx-frame {
+  width: 100%;
+  height: calc(100vh - 92px);
+  border: 0;
+  background: #fff;
+}
+
+.docx-fallback {
+  max-width: 64ch;
+  margin: 48px auto;
+  padding: 18px 22px;
+  border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  line-height: 1.7;
+}
+
+.docx-fallback h3 {
+  margin-top: 0;
+}
+
+/* ---------- 空状态 ---------- */
+
+.empty-state {
+  max-width: 64ch;
+  margin: 56px auto;
+  text-align: center;
+  line-height: 1.8;
+  opacity: 0.85;
+}
+
+.empty-state .reason {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.9em;
+  opacity: 0.8;
+  word-break: break-all;
+}
+
+.empty-state button {
+  margin-top: 14px;
+}
+
+/* ---------- 「没法预览，去本地打开」卡片 ---------- */
+
+.file-card {
+  max-width: 68ch;
+  margin: 44px auto;
+  padding: 20px 24px;
+  border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.07));
+  line-height: 1.7;
+}
+
+.file-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.05em;
+}
+
+.file-card p {
+  margin: 0.5em 0;
+}
+
+.file-card .path {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.88em;
+  word-break: break-all;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.12));
+  opacity: 0.9;
+}
+
+.file-card .muted {
+  font-size: 0.88em;
+  opacity: 0.7;
+}
+
+.file-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.file-card code {
+  font-family: var(--vscode-editor-font-family, monospace);
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.18));
+}

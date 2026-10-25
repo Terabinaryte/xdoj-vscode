@@ -1,0 +1,711 @@
+{
+  "name": "xdoj-vscode",
+  "displayName": "XDOJ",
+  "description": "在 VS Code 里刷 OJ：题目列表、题面预览（PDF / DOCX / TXT）、一键提交 cpp、提交状态",
+  "version": "0.0.27",
+  "publisher": "Terabinaryte",
+  "author": {
+    "name": "Terabinaryte"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Education",
+    "Other"
+  ],
+  "keywords": [
+    "oj",
+    "xdoj",
+    "judge",
+    "competitive-programming"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "xdoj",
+          "title": "XDOJ",
+          "icon": "media/icons/xdoj.svg"
+        }
+      ]
+    },
+    "views": {
+      "xdoj": [
+        {
+          "id": "xdoj.problems",
+          "name": "比赛 / 题目",
+          "icon": "media/icons/xdoj.svg",
+          "contextualTitle": "XDOJ 比赛与题目"
+        },
+        {
+          "id": "xdoj.submissions",
+          "name": "提交记录",
+          "icon": "media/icons/xdoj.svg",
+          "contextualTitle": "XDOJ 提交记录"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "xdoj.problems",
+        "contents": "还没有比赛数据。\n[刷新比赛列表](command:xdoj.refreshProblems)\n配置 OJ 地址与账号：[打开设置](command:xdoj.openSettings)"
+      },
+      {
+        "view": "xdoj.submissions",
+        "contents": "还没有提交记录。\n[刷新提交记录](command:xdoj.refreshSubmissions)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "xdoj.refreshProblems",
+        "title": "刷新比赛 / 题目列表",
+        "category": "XDOJ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "xdoj.openProblem",
+        "title": "打开题目",
+        "category": "XDOJ"
+      },
+      {
+        "command": "xdoj.openProblemById",
+        "title": "按题号打开题目…",
+        "category": "XDOJ"
+      },
+      {
+        "command": "xdoj.filterProblems",
+        "title": "过滤比赛 / 题目…",
+        "category": "XDOJ",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "xdoj.submitFile",
+        "title": "提交当前文件",
+        "category": "XDOJ",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "xdoj.submitFileTo",
+        "title": "提交当前文件到指定题目…",
+        "category": "XDOJ",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "xdoj.refreshSubmissions",
+        "title": "刷新提交记录",
+        "category": "XDOJ",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "xdoj.openSubmission",
+        "title": "查看提交详情",
+        "category": "XDOJ"
+      },
+      {
+        "command": "xdoj.clearSubmissions",
+        "title": "清空提交记录",
+        "category": "XDOJ",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "xdoj.login",
+        "title": "登录",
+        "category": "XDOJ",
+        "icon": "$(sign-in)"
+      },
+      {
+        "command": "xdoj.logout",
+        "title": "退出登录",
+        "category": "XDOJ",
+        "icon": "$(sign-out)"
+      },
+      {
+        "command": "xdoj.setPassword",
+        "title": "设置密码",
+        "category": "XDOJ",
+        "icon": "$(key)"
+      },
+      {
+        "command": "xdoj.clearPassword",
+        "title": "清除已保存的密码",
+        "category": "XDOJ",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "xdoj.diagnostics",
+        "title": "诊断接口连通性",
+        "category": "XDOJ",
+        "icon": "$(pulse)"
+      },
+      {
+        "command": "xdoj.showLogs",
+        "title": "显示日志",
+        "category": "XDOJ",
+        "icon": "$(output)"
+      },
+      {
+        "command": "xdoj.openSettings",
+        "title": "打开设置",
+        "category": "XDOJ",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "xdoj.copyProblemStatementUrl",
+        "title": "复制题面原始地址",
+        "category": "XDOJ"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "xdoj.openProblem",
+          "when": "false"
+        },
+        {
+          "command": "xdoj.openSubmission",
+          "when": "false"
+        },
+        {
+          "command": "xdoj.copyProblemStatementUrl",
+          "when": "false"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "xdoj.refreshProblems",
+          "when": "view == xdoj.problems",
+          "group": "navigation@1"
+        },
+        {
+          "command": "xdoj.filterProblems",
+          "when": "view == xdoj.problems",
+          "group": "navigation@2"
+        },
+        {
+          "command": "xdoj.login",
+          "when": "view == xdoj.problems",
+          "group": "navigation@3"
+        },
+        {
+          "command": "xdoj.logout",
+          "when": "view == xdoj.problems",
+          "group": "navigation@4"
+        },
+        {
+          "command": "xdoj.refreshSubmissions",
+          "when": "view == xdoj.submissions",
+          "group": "navigation@1"
+        },
+        {
+          "command": "xdoj.clearSubmissions",
+          "when": "view == xdoj.submissions",
+          "group": "navigation@2"
+        },
+        {
+          "command": "xdoj.diagnostics",
+          "when": "view == xdoj.problems",
+          "group": "navigation@5"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "xdoj.submitFileTo",
+          "when": "view == xdoj.problems && viewItem == xdoj.problem",
+          "group": "inline@1"
+        },
+        {
+          "command": "xdoj.copyProblemStatementUrl",
+          "when": "view == xdoj.problems && viewItem == xdoj.problem",
+          "group": "1_manage@1"
+        },
+        {
+          "command": "xdoj.refreshProblems",
+          "when": "view == xdoj.problems && viewItem == xdoj.problem",
+          "group": "1_manage@2"
+        },
+        {
+          "command": "xdoj.openSubmission",
+          "when": "view == xdoj.submissions && viewItem == xdoj.submission",
+          "group": "1_manage@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "xdoj.submitFile",
+          "when": "resourceExtname == .cpp || resourceExtname == .cc || resourceExtname == .cxx || resourceExtname == .c",
+          "group": "navigation@10"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "xdoj.submitFile",
+          "when": "resourceExtname == .cpp || resourceExtname == .cc || resourceExtname == .cxx || resourceExtname == .c",
+          "group": "xdoj@1"
+        },
+        {
+          "command": "xdoj.submitFileTo",
+          "when": "resourceExtname == .cpp || resourceExtname == .cc || resourceExtname == .cxx || resourceExtname == .c",
+          "group": "xdoj@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "XDOJ",
+      "properties": {
+        "xdoj.endpoint": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**OJ 站点根地址（必填）。** 所有相对接口路径都拼在它后面，例如 `http://your-oj.example/`。\n\n这里**故意留空**：开源版本不该把某个学校的内网/公网地址当成默认值。首次运行扩展会提示你去填。",
+          "order": 1
+        },
+        "xdoj.account": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**登录账户（学号 / 用户名）。** 不涉及密码，明文写在设置里没有风险。",
+          "order": 2
+        },
+        "xdoj.password": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "**登录密码。**\n\n⚠️ 这一项是**明文**保存在 `settings.json` 里的，只图省事时用。\n更稳妥的做法是把这里留空，改用命令 **`XDOJ: 设置密码`** —— 密码会存进 VS Code 的加密凭据库（SecretStorage）。\n\n两者都填时以本设置项为准。",
+          "order": 3
+        },
+        "xdoj.useMockData": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "使用内置样例数据（`sample-problem-a` ~ `sample-problem-f` 的假题）。想先在界面上试手时打开它；接真实 OJ 时保持关闭。",
+          "order": 4
+        },
+        "xdoj.endpoints.login": {
+          "type": "string",
+          "default": "/xdoj-ssm/user/login.do",
+          "description": "登录接口（POST）。",
+          "order": 5
+        },
+        "xdoj.endpoints.contests": {
+          "type": "string",
+          "default": "/xdoj-ssm/contest/list.do",
+          "markdownDescription": "**比赛列表**接口（jqGrid，POST form-urlencoded）。XDOJ 的题目挂在比赛下面。留空则退回扁平题目列表模式，改走 `xdoj.endpoints.problems`。可用占位符：`{account}` / `{userId}`、`{timestamp}`。",
+          "order": 7
+        },
+        "xdoj.contestListTemplate": {
+          "type": "object",
+          "default": {
+            "_search": "false",
+            "nd": "{timestamp}",
+            "rows": "100",
+            "page": "1",
+            "sidx": "",
+            "sord": "asc"
+          },
+          "markdownDescription": "比赛列表的 jqGrid 请求体。`{timestamp}` 会替换成当前毫秒时间戳（jqGrid 的 cache buster）。",
+          "order": 8
+        },
+        "xdoj.submissionListTemplate": {
+          "type": "object",
+          "default": {
+            "_search": "false",
+            "nd": "{timestamp}",
+            "rows": "100",
+            "page": "1",
+            "sidx": "",
+            "sord": "asc"
+          },
+          "markdownDescription": "提交记录列表的 jqGrid 请求体。和比赛列表同一套协议。",
+          "order": 17
+        },
+        "xdoj.endpoints.contestProblems": {
+          "type": "string",
+          "default": "/xdoj-ssm/contest/problems.do?contestId={contestId}&userId={account}&_search=false&nd={timestamp}&rows=100&page=1&sidx=&sord=asc",
+          "markdownDescription": "**展开比赛时拉取题目**的接口（GET）。可用占位符：`{contestId}`、`{account}` / `{userId}`、`{timestamp}`。",
+          "order": 9
+        },
+        "xdoj.extraCookies": {
+          "type": "object",
+          "default": {
+            "preferred_lang": "zh_CN"
+          },
+          "markdownDescription": "额外附加到 `Cookie` 头上的键值对。抓包显示 XDOJ 靠 `preferred_lang` Cookie 决定返回哪种语言。登录拿到的会话 Cookie 同名时优先。",
+          "order": 10
+        },
+        "xdoj.loginPayload": {
+          "type": "object",
+          "default": {
+            "preferLanguage": "zh_CN",
+            "userId": "{account}",
+            "password": "{password}"
+          },
+          "markdownDescription": "登录请求体的字段映射。可用占位符：`{account}`、`{username}`（同 `{account}`）、`{password}`。",
+          "order": 11
+        },
+        "xdoj.loginContentType": {
+          "type": "string",
+          "enum": [
+            "json",
+            "form"
+          ],
+          "enumDescriptions": [
+            "application/json",
+            "application/x-www-form-urlencoded"
+          ],
+          "default": "form",
+          "description": "登录请求体的编码方式。",
+          "order": 12
+        },
+        "xdoj.tokenHeader": {
+          "type": "string",
+          "default": "Authorization",
+          "description": "登录拿到的 token 放在哪个请求头里。",
+          "order": 38
+        },
+        "xdoj.tokenPrefix": {
+          "type": "string",
+          "default": "Bearer ",
+          "markdownDescription": "token 前缀。默认 `Bearer `（注意末尾有空格）；OJ 直接收裸 token 时留空。",
+          "order": 39
+        },
+        "xdoj.endpoints.problems": {
+          "type": "string",
+          "default": "/api/problems",
+          "description": "题目列表接口。期望返回数组，元素含 id/title 字段。",
+          "order": 13
+        },
+        "xdoj.endpoints.problem": {
+          "type": "string",
+          "default": "",
+          "description": "题目详情接口，{id} 会被替换为题号。",
+          "order": 14,
+          "markdownDescription": "题目详情接口。**留空（默认）**表示不用它——比赛题目列表返回的字段已经够用，题面直接走 `xdoj.endpoints.statement`。"
+        },
+        "xdoj.endpoints.statement": {
+          "type": "string",
+          "default": "/xdoj-ssm/problem/downloadTextFile.do?problemId={id}",
+          "markdownDescription": "**题面附件下载**接口（GET）。返回 PDF / DOCX / TXT 等，类型按响应头里的文件名后缀判断。需要登录态。占位符：`{id}`、`{account}` / `{userId}`、`{timestamp}`。",
+          "order": 15
+        },
+        "xdoj.downloadDir": {
+          "type": "string",
+          "default": "problems",
+          "markdownDescription": "题面文件下载到哪个目录。**相对路径按工作区根目录解析**，所以默认值 `problems` 就是 `<工作区>/problems/`；也可以写绝对路径，或用 `{workspaceFolder}` 占位。没有打开工作区时落到扩展的全局存储目录。**留空则不落盘**，只在标签页里渲染。",
+          "order": 16
+        },
+        "xdoj.endpoints.submit": {
+          "type": "string",
+          "default": "/xdoj-ssm/submission/submit.do",
+          "description": "提交接口（POST）。",
+          "order": 25,
+          "markdownDescription": "提交接口（POST，multipart/form-data）。"
+        },
+        "xdoj.endpoints.submitPage": {
+          "type": "string",
+          "default": "/xdoj-ssm/team/submit.do?problemId={problemId}",
+          "markdownDescription": "**提交页**。XDOJ 的 `classId` 是服务端渲染进这个页面 `<input type=\"hidden\">` 的，没有独立接口，只能 GET 下来刮。留空则不刮。占位符：`{problemId}`、`{contestId}`、`{account}`。",
+          "order": 19
+        },
+        "xdoj.submitEncoding": {
+          "type": "string",
+          "enum": [
+            "multipart",
+            "form",
+            "json"
+          ],
+          "enumDescriptions": [
+            "multipart/form-data（XDOJ 用的就是这个）",
+            "application/x-www-form-urlencoded",
+            "application/json"
+          ],
+          "default": "multipart",
+          "description": "提交请求体怎么编码。",
+          "order": 20
+        },
+        "xdoj.submitFields": {
+          "type": "object",
+          "default": {
+            "solutionType": "0",
+            "contestId": "{contestId}",
+            "userId": "{account}",
+            "classId": "{classId}",
+            "problemId": "{problemId}",
+            "languageId": "{language}",
+            "sourceCode": ""
+          },
+          "markdownDescription": "提交表单的普通字段（照抄抓包）。占位符：`{problemId}`、`{contestId}`、`{classId}`、`{account}` / `{userId}`、`{language}` / `{languageId}`、`{code}`、`{filename}`。\n\n注意 `sourceCode` 在页面上其实是个 **Ace 编辑器的 div**（不是 input），由 JS 读内容后追加，走文件上传时它是空的。",
+          "order": 21
+        },
+        "xdoj.submitFileField": {
+          "type": "string",
+          "default": "sourceFile",
+          "markdownDescription": "源码那段 multipart 部分的**字段名**，对应提交页里 `<input type=\"file\" name=\"sourceFile\">`。XDOJ 就是 `sourceFile`，**不用改**。\n\n留空 = 完全不发文件部分，源码只能靠 `xdoj.submitFields` 里某个字段的 `{code}` 带上去；两个都没配就会提交空代码。而且文本字段只能按 UTF-8 发，保留不了 GB2312 这类原始编码。",
+          "order": 22
+        },
+        "xdoj.submitFileContentType": {
+          "type": "string",
+          "default": "text/x-c++src",
+          "description": "源码文件部分的 Content-Type。",
+          "order": 23
+        },
+        "xdoj.submitTranscode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "utf8"
+          ],
+          "enumDescriptions": [
+            "原样上传磁盘字节（等价于浏览器上传文件）",
+            "先解码再按 UTF-8 重新编码"
+          ],
+          "default": "none",
+          "markdownDescription": "上传前要不要把源码转成 UTF-8。\n\n**默认 `none`**：直接把磁盘上的原始字节发出去，和浏览器 `<input type=\"file\">` 完全一致 —— GB2312/GB18030 的文件不会被改坏。\n\n填 `utf8` 时按编辑器识别的编码解码、再编成 UTF-8；只有当服务端或评测机明确要求 UTF-8 时才需要。",
+          "order": 25
+        },
+        "xdoj.classId": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "班级编号。**留空（默认）时会自动从提交页 HTML 里刮**，通常不用填。只有在自动刮取失败时才手动指定。",
+          "order": 24
+        },
+        "xdoj.endpoints.submission": {
+          "type": "string",
+          "default": "",
+          "description": "单条提交状态查询接口，{id} 会被替换为提交 ID。",
+          "order": 18,
+          "markdownDescription": "单条提交状态查询接口。**留空（默认）**表示没有这个接口——扩展会退回「拉一次提交列表再按 id 找」的方式，XDOJ 的 results.do 一行就带齐了全部信息。"
+        },
+        "xdoj.endpoints.judgeList": {
+          "type": "string",
+          "default": "/xdoj-ssm/submission/listJudge.do?submissionId={id}&_search=false&nd={timestamp}&rows=5&page=1&sidx=&sord=asc",
+          "markdownDescription": "某次提交对应的**评测记录**（jqGrid，GET）。返回的 `data[0].id` 就是 `judgeId`——它和提交 ID **不是同一个号**。逐测试点结果靠它换号。占位符：`{id}`（提交 ID）、`{timestamp}`。留空则退回从 `judgePage` 里刮。",
+          "order": 17.4
+        },
+        "xdoj.endpoints.judgePage": {
+          "type": "string",
+          "default": "/xdoj-ssm/team/viewJudge.do?submissionId={id}",
+          "markdownDescription": "单次评测的详情页。逐测试点结果要先从这个页面里刮出 `judgeId`——`judgeId` 和提交 ID **不是同一个号**。占位符：`{id}`（提交 ID）。留空则只能靠提交记录里自带的 `judgeId`。",
+          "order": 17.5
+        },
+        "xdoj.endpoints.judgeRuns": {
+          "type": "string",
+          "default": "/xdoj-ssm/submission/listAllJudgeRun.do",
+          "markdownDescription": "**逐测试点结果**（jqGrid，POST form-urlencoded，body `judgeId=...`）。留空则不显示测试点。占位符：`{judgeId}`、`{id}`（提交 ID）。",
+          "order": 17.6
+        },
+        "xdoj.endpoints.submissions": {
+          "type": "string",
+          "default": "/xdoj-ssm/submission/results.do?contestId={contestId}&userId={account}",
+          "description": "提交记录列表接口（jqGrid，POST form-urlencoded）。必须带 contestId。",
+          "order": 16,
+          "markdownDescription": "**提交记录列表**接口（jqGrid，POST form-urlencoded）。XDOJ 是按比赛维度查的，所以 `contestId` 必填——扩展会用当前比赛（最近打开题目所属的那场）。占位符：`{contestId}`、`{account}` / `{userId}`、`{timestamp}`。"
+        },
+        "xdoj.submitPayload": {
+          "type": "object",
+          "default": {
+            "problemId": "{problemId}",
+            "language": "{language}",
+            "code": "{code}"
+          },
+          "markdownDescription": "提交请求体的字段映射，**只在 `xdoj.submitEncoding` 是 `form` 或 `json` 时生效**。multipart 模式请看 `xdoj.submitFields`。",
+          "order": 26
+        },
+        "xdoj.submitLanguage": {
+          "type": "string",
+          "default": "2",
+          "description": "提交时的语言标识（对应表单里的 languageId）。XDOJ 的 languages[].id=2 是「GNU C/C++」。",
+          "order": 27
+        },
+        "xdoj.requestHeaders": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "附加到每个请求上的请求头。这里写的头**优先级最高**，可以覆盖登录自动生成的 `Authorization` / `Cookie`，例如 `{\"X-CSRF-Token\": \"...\"}`。",
+          "order": 28
+        },
+        "xdoj.commonQueryParams": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "附加到所有业务请求 URL 上的 query 参数。默认空——XDOJ 的语言偏好是走 Cookie 的（见 `xdoj.extraCookies`），不需要 query 参数。",
+          "order": 29
+        },
+        "xdoj.userAgent": {
+          "type": "string",
+          "default": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          "markdownDescription": "请求时用的 **User-Agent**。有些 Java 后端会按 UA 分流（移动端 / 桌面端）。留空则不发送该头。注意这个确实是全局的——浏览器对所有请求本来就发同一个 UA。",
+          "order": 30
+        },
+        "xdoj.pollIntervalMs": {
+          "type": "number",
+          "default": 2000,
+          "minimum": 500,
+          "description": "评测中提交的轮询间隔（毫秒）。",
+          "order": 33
+        },
+        "xdoj.pollTimeoutMs": {
+          "type": "number",
+          "default": 120000,
+          "description": "单次提交轮询的最长等待时间（毫秒）。",
+          "order": 34
+        },
+        "xdoj.docxPreview": {
+          "type": "string",
+          "enum": [
+            "office-online",
+            "download"
+          ],
+          "enumDescriptions": [
+            "用 Microsoft Office 在线预览嵌入（要求该文件可被公网匿名访问；需要登录态的 OJ 附件用不了）",
+            "不预览，直接把文件下载到本地并用系统程序打开（默认）"
+          ],
+          "default": "download",
+          "description": "DOCX 题面的渲染方式。",
+          "order": 35,
+          "markdownDescription": "DOCX 题面的处理方式。XDOJ 的题面接口需要 Cookie，Office 在线预览抓不到文件，所以默认走本地下载。"
+        },
+        "xdoj.problemOpenColumn": {
+          "type": "string",
+          "enum": [
+            "active",
+            "beside"
+          ],
+          "enumDescriptions": [
+            "在当前编辑器组打开题面",
+            "在右侧新编辑器组打开题面"
+          ],
+          "default": "beside",
+          "description": "题面标签页的打开位置。",
+          "order": 36
+        },
+        "xdoj.requestTimeoutMs": {
+          "type": "number",
+          "default": 20000,
+          "description": "单个 HTTP 请求超时（毫秒）。",
+          "order": 37
+        },
+        "xdoj.referers": {
+          "type": "object",
+          "default": {
+            "login": "{endpoint}/xdoj-ssm/login.jsp",
+            "contests": "{endpoint}/xdoj-ssm/team/contests.do",
+            "contestProblems": "{endpoint}/xdoj-ssm/team/problems.do",
+            "problems": "{endpoint}/xdoj-ssm/",
+            "problem": "{endpoint}/xdoj-ssm/",
+            "submit": "{endpoint}/xdoj-ssm/team/submit.do?problemId={problemId}",
+            "submission": "{endpoint}/xdoj-ssm/team/results.do",
+            "submissions": "{endpoint}/xdoj-ssm/team/results.do",
+            "statement": "{endpoint}/xdoj-ssm/",
+            "submitPage": "{endpoint}/xdoj-ssm/team/problems.do",
+            "loginPage": "{endpoint}/xdoj-ssm/"
+          },
+          "markdownDescription": "**按接口分别配置 Referer**。键名和 `xdoj.endpoints` 一一对应：`login` / `contests` / `contestProblems` / `problems` / `problem` / `submit` / `submission` / `submissions`。\n\n模板里可用 `{endpoint}`（原样替换，不编码）以及 `{account}` / `{userId}` / `{timestamp}` / `{contestId}` / `{id}`。某个接口的值留空则不发 Referer。\n\n想完全接管的话，用 `xdoj.requestHeaders` 里的 `Referer`，它优先级更高。",
+          "order": 31
+        },
+        "xdoj.sessionExpiredRedirect": {
+          "type": "string",
+          "default": "/xdoj-ssm/",
+          "markdownDescription": "**登录态失效时服务端会 302 到这里。** XDOJ 不做 401/403，而是直接跳到站点根。扩展据此判断「该重新登录了」，并自动重登 + 重试一次。如果实际跳转目标不同，改这里（也支持填完整 URL）。",
+          "order": 32
+        },
+        "xdoj.endpoints.loginPage": {
+          "type": "string",
+          "default": "/xdoj-ssm/login.jsp",
+          "markdownDescription": "登录页地址。诊断里的「换会话实验」会先打开它再登录，用来对比扩展直接 POST 登录产生的会话是否不同。",
+          "order": 6
+        },
+        "xdoj.httpTransport": {
+          "type": "string",
+          "enum": [
+            "fetch",
+            "node"
+          ],
+          "enumDescriptions": [
+            "Node 内置的 undici（默认）",
+            "node:http 逐字节控制，行为最接近 curl；会跳过 undici 自动加的头，也不复用连接"
+          ],
+          "default": "fetch",
+          "markdownDescription": "HTTP 传输层实现。遇到对 undici 特别敏感的服务器时可以切到 `node` 试试。",
+          "order": 39
+        },
+        "xdoj.retryOnServerError": {
+          "type": "boolean",
+          "default": true,
+          "order": 44,
+          "markdownDescription": "服务端返回 5xx 时自动重试（最多 2 次）。只对 GET/HEAD 生效，避免重复提交。"
+        },
+        "xdoj.retryDelayMs": {
+          "type": "number",
+          "default": 400,
+          "minimum": 0,
+          "order": 45,
+          "description": "5xx 重试前的等待时间（毫秒）。"
+        },
+        "xdoj.prewarmEnabled": {
+          "type": "boolean",
+          "default": true,
+          "order": 42,
+          "markdownDescription": "是否在展开比赛前先按 `xdoj.prewarmSteps` 建立会话状态。换比赛或换会话后都会重做。"
+        },
+        "xdoj.prewarmSteps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "method",
+              "url"
+            ],
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "contentType": {
+                "type": "string"
+              },
+              "referer": {
+                "type": "string"
+              }
+            }
+          },
+          "default": [
+            {
+              "method": "POST",
+              "url": "/xdoj-ssm/team/selectContest.do",
+              "body": "contestId={contestId}",
+              "contentType": "application/x-www-form-urlencoded; charset=UTF-8",
+              "referer": "{endpoint}/xdoj-ssm/team/contests.do"
+            }
+          ],
+          "markdownDescription": "发 `contest/problems.do` 之前要**按顺序**执行的请求。\n\nXDOJ 的「当前比赛」是靠 `POST team/selectContest.do`（body `contestId=<比赛ID>`）写进 session 的，而 `contest/problems.do` 会去取它、且没判 null —— 没建好就直接 `ClassCastException`。浏览器点比赛名时走的正是这一步。\n\n占位符：`{contestId}`、`{account}` / `{userId}`、`{timestamp}`、`{endpoint}`（`{endpoint}` 原样替换不做编码）。**每场比赛预热一次**，换比赛或换会话都会重做。写空数组则完全跳过。",
+          "order": 43
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "prepare:assets": "node scripts/copy-pdfjs.mjs",
+    "build": "npm run prepare:assets && tsc -p .",
+    "watch": "tsc -p . -w",
+    "typecheck": "tsc -p . --noEmit",
+    "smoke": "node scripts/smoke-test.mjs",
+    "verify": "npm run typecheck && npm run build && npm run smoke",
+    "package": "npm run build && npx vsce package --no-dependencies --allow-missing-repository",
+    "postinstall": "node scripts/copy-pdfjs.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "1.90.0",
+    "@vscode/vsce": "^4.0.0",
+    "pdfjs-dist": "6.4.299",
+    "typescript": "^5.6.0"
+  }
+}

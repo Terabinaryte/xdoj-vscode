@@ -1,0 +1,25 @@
+# 扩展包里**只**放运行必需的东西：package.json / README / CHANGELOG / out/ / media/
+.vscode/**
+src/**
+scripts/**
+tools/**
+docs/**
+tsconfig.json
+package-lock.json
+.gitignore
+.npm-cache/**
+node_modules/**
+out/**/*.map
+**/*.ts
+**/*.map
+!media/**
+
+# 私有内容：绝不能进扩展包（曾经把带明文密码的抓包日志打进了 vsix）
+*.log
+dump_requests.log
+*.vsix
+.env
+.env.*
+*.pem
+*.key
+.npmrc
