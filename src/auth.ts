@@ -18,6 +18,8 @@ export interface Session {
   /** 从 Set-Cookie 收集到的 cookie，形如 `["PHPSESSID=abc; Path=/"]`。 */
   cookies: string[];
   account: string;
+  /** 登录时站点的 origin；禁止把旧站点的凭据带到另一个主机。 */
+  origin: string;
   obtainedAt: number;
 }
 
@@ -41,16 +43,23 @@ export class SessionManager implements vscode.Disposable {
   ) {}
 
   get current(): Session | undefined {
-    return this.session;
+    return this.session && this.sessionMatchesCurrentConfig(this.session) ? this.session : undefined;
   }
 
   get isLoggedIn(): boolean {
-    return !!this.session;
+    return !!this.session && this.sessionMatchesCurrentConfig(this.session);
   }
 
-  /** 展示用账户名：优先会话里的，其次配置里的。 */
+  /** 当前会话是否仍属于现有站点与账户。 */
+  private sessionMatchesCurrentConfig(session: Session): boolean {
+    const config = this.getConfig();
+    return session.origin === endpointOrigin(config.endpoint) && session.account === config.account.trim();
+  }
+
+  /** 展示用账户名：优先有效会话里的，其次配置里的。 */
   get displayAccount(): string {
-    return this.session?.account || this.getConfig().account || '';
+    return (this.session && this.sessionMatchesCurrentConfig(this.session) ? this.session.account : '') ||
+      this.getConfig().account || '';
   }
 
   /** 扩展启动时把上次的会话捞回来，省得每次开窗口都重新登录。 */
@@ -62,13 +71,26 @@ export class SessionManager implements vscode.Disposable {
       }
       const parsed = JSON.parse(raw) as Partial<Session>;
       if (parsed && typeof parsed === 'object' && (parsed.token || (parsed.cookies?.length ?? 0) > 0)) {
-        this.session = {
-          token: typeof parsed.token === 'string' ? parsed.token : undefined,
-          cookies: Array.isArray(parsed.cookies) ? parsed.cookies.filter((c) => typeof c === 'string') : [],
-          account: typeof parsed.account === 'string' ? parsed.account : '',
-          obtainedAt: typeof parsed.obtainedAt === 'number' ? parsed.obtainedAt : Date.now(),
-        };
-        log.info(`[auth] 已恢复上次的会话（账户 ${this.session.account || '未知'}）`);
+        const origin = endpointOrigin(this.getConfig().endpoint);
+        const account = this.getConfig().account.trim();
+        if (
+          !origin ||
+          parsed.origin !== origin ||
+          typeof parsed.account !== 'string' ||
+          parsed.account !== account
+        ) {
+          log.warn('[auth] 保存的会话不属于当前站点或账户，已清除并要求重新登录');
+          await this.secrets.delete(SECRET_SESSION);
+        } else {
+          this.session = {
+            token: typeof parsed.token === 'string' ? parsed.token : undefined,
+            cookies: Array.isArray(parsed.cookies) ? parsed.cookies.filter((c) => typeof c === 'string') : [],
+            account: typeof parsed.account === 'string' ? parsed.account : '',
+            origin,
+            obtainedAt: typeof parsed.obtainedAt === 'number' ? parsed.obtainedAt : Date.now(),
+          };
+          log.info(`[auth] 已恢复上次的会话（账户 ${this.session.account || '未知'}）`);
+        }
       }
     } catch (error) {
       log.warn('[auth] 恢复会话失败，将重新登录', error);
@@ -129,8 +151,11 @@ export class SessionManager implements vscode.Disposable {
    * 确保已有可用会话。force=true 时强制重新登录（token 过期走这条路）。
    */
   async login(force = false): Promise<Session> {
-    if (!force && this.session) {
+    if (!force && this.session && this.sessionMatchesCurrentConfig(this.session)) {
       return this.session;
+    }
+    if (this.session && !this.sessionMatchesCurrentConfig(this.session)) {
+      await this.clearStaleSession();
     }
     if (this.loginInFlight) {
       return this.loginInFlight;
@@ -239,7 +264,13 @@ export class SessionManager implements vscode.Disposable {
       );
     }
 
-    this.session = { token, cookies, account, obtainedAt: Date.now() };
+    this.session = {
+      token,
+      cookies,
+      account,
+      origin: endpointOrigin(config.endpoint) ?? new URL(url).origin,
+      obtainedAt: Date.now(),
+    };
     await this.secrets.store(SECRET_SESSION, JSON.stringify(this.session));
     this.emitter.fire();
     log.info(
@@ -247,6 +278,13 @@ export class SessionManager implements vscode.Disposable {
         (cookies.length > 0 ? `，cookie×${cookies.length}` : ''),
     );
     return this.session;
+  }
+
+  /** endpoint / account 配置变化后清理不再匹配的会话。 */
+  async invalidateIfConfigChanged(): Promise<void> {
+    if (this.session && !this.sessionMatchesCurrentConfig(this.session)) {
+      await this.clearStaleSession();
+    }
   }
 
   async logout(): Promise<void> {
@@ -278,12 +316,13 @@ export class SessionManager implements vscode.Disposable {
   async sessionHeaders(): Promise<Record<string, string>> {
     const config = this.getConfig();
     const headers: Record<string, string> = {};
+    const session = this.session && this.sessionMatchesCurrentConfig(this.session) ? this.session : undefined;
 
-    if (this.session?.token) {
-      headers[config.tokenHeader] = `${config.tokenPrefix}${this.session.token}`;
+    if (session?.token) {
+      headers[config.tokenHeader] = `${config.tokenPrefix}${session.token}`;
     }
 
-    const cookie = buildCookieHeader(config, this.session?.cookies ?? []);
+    const cookie = buildCookieHeader(config, session?.cookies ?? []);
     if (cookie) {
       headers['Cookie'] = cookie;
     }
@@ -295,7 +334,7 @@ export class SessionManager implements vscode.Disposable {
    * 不少 OJ 会在每次请求时刷新 session，不跟上就会掉登录。
    */
   absorbCookies(response: Response): void {
-    if (!this.session) {
+    if (!this.session || !this.sessionMatchesCurrentConfig(this.session)) {
       return;
     }
     const fresh = readSetCookies(response);
@@ -319,6 +358,15 @@ export class SessionManager implements vscode.Disposable {
 }
 
 // ------------------------------------------------------------------ 工具
+
+function endpointOrigin(endpoint: string): string | undefined {
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.origin : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Node 20+ 的 undici 提供 getSetCookie()，拿不到时退回到整条读并手工切分。 */
 export function readSetCookies(response: Response): string[] {

@@ -118,7 +118,10 @@ export class XdojService implements vscode.Disposable {
           log.info('检测到配置变化，重建 OJ 客户端');
           this.config = getConfig();
           this.client = this.createClient();
-          void this.refreshProblems();
+          void this.session
+            .invalidateIfConfigChanged()
+            .catch((error) => log.warn('清理已失效会话失败；旧会话仍会被 origin 校验阻止发送', error))
+            .finally(() => void this.refreshProblems());
         }
       }),
     );

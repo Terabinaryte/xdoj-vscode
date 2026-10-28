@@ -1139,6 +1139,31 @@ await testAsync('会话能跨重启恢复（写入加密凭据库）', async () 
   void service;
 });
 
+await testAsync('会话不会跨站点或账户恢复 / 发送', async () => {
+  const service = await useRealOj();
+  serve((parsed) =>
+    parsed.pathname === '/api/login'
+      ? jsonResponse({ token: 'tok-bound' }, { headers: { 'set-cookie': 'JSESSIONID=BOUND; Path=/' } })
+      : jsonResponse({}),
+  );
+  await service.session.login(true);
+  assert.equal(service.session.isLoggedIn, true);
+
+  // 配置切换到另一站点后，即使尚未完成配置事件清理，也不得发送旧凭据。
+  service.getConfig().endpoint = 'https://other.test';
+  assert.equal(service.session.isLoggedIn, false);
+  const headers = await service.session.sessionHeaders();
+  assert.ok(!headers['Authorization'], '旧 Token 不得发出');
+  assert.ok(!headers['Cookie']?.includes('JSESSIONID=BOUND'), '旧会话 Cookie 不得发出');
+  assert.equal(headers['Cookie'], 'preferred_lang=zh_CN', '无登录态时仍允许静态语言偏好 Cookie');
+
+  const { SessionManager } = require(join(projectRoot, 'out', 'auth.js'));
+  const revived = new SessionManager(context.secrets, () => service.getConfig());
+  await revived.restore();
+  assert.equal(revived.isLoggedIn, false, '不同 origin 的持久会话必须拒绝恢复');
+  assert.equal(secrets.get('xdoj.session'), undefined, '不匹配的凭据应从 SecretStorage 删除');
+});
+
 await testAsync('密码不会泄漏进日志，token 认证头会打码', async () => {
   const service = await useRealOj({ 'xdoj.password': 'super-secret-password' });
   serve((parsed) =>
@@ -2926,6 +2951,43 @@ await testAsync('非登录跳转会被正常跟随', async () => {
   await service.refreshProblems({ silent: true });
   assert.equal(service.getContests().length, 1, '普通跳转应当被跟随');
   assert.ok(requestLog.some((c) => c.path === '/xdoj-ssm/contest/list2.do'));
+});
+
+await testAsync('跨 origin 重定向会被拒绝且不发送认证信息', async () => {
+  const service = await useRealOj({
+    'xdoj.endpoints.login': '/api/login',
+    'xdoj.endpoints.contests': '/api/contests',
+  });
+  serve((parsed) => {
+    if (parsed.pathname === '/api/login') {
+      return jsonResponse({ token: 'tok-no-forward' });
+    }
+    return new Response(null, { status: 302, headers: { Location: 'https://evil.test/collect' } });
+  });
+  await service.session.login(true);
+
+  requestLog.length = 0;
+  await service.refreshProblems({ silent: true });
+  assert.equal(requestLog.length, 1, '拒绝跨站跳转后不应请求第三方');
+  assert.equal(new URL(requestLog[0].url).origin, 'http://oj.test');
+  assert.equal(requestLog[0].headers['Authorization'], 'Bearer tok-no-forward');
+  assert.ok(!requestLog.some((call) => new URL(call.url).origin === 'https://evil.test'));
+});
+
+await testAsync('跨 origin 的显式 URL 不带会话或自定义凭据头', async () => {
+  const service = await useRealOj({
+    'xdoj.requestHeaders': { Authorization: 'Manual token', 'X-API-Key': 'manual-secret' },
+  });
+  serve((parsed) => (parsed.pathname === '/api/login' ? jsonResponse({ token: 'tok-origin' }) : jsonResponse({})));
+  await service.session.login(true);
+
+  requestLog.length = 0;
+  await service.client.probe('GET', 'https://evil.test/collect');
+  assert.equal(requestLog.length, 1);
+  assert.equal(new URL(requestLog[0].url).origin, 'https://evil.test');
+  assert.equal(requestLog[0].headers['Authorization'], undefined);
+  assert.equal(requestLog[0].headers['X-API-Key'], undefined);
+  assert.equal(requestLog[0].headers['Cookie'], undefined);
 });
 
 // ------------------------------------------------- 诊断命令

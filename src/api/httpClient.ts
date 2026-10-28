@@ -73,19 +73,39 @@ export class HttpOjClient implements OjClient {
     referer?: string,
     extra?: Record<string, string>,
     navigation = false,
+    sendCredentials = true,
   ): Promise<Record<string, string>> {
     const headers: Record<string, string> = buildBaseHeaders(this.config, referer, { navigation });
+    if (!sendCredentials) {
+      // 自定义请求头可能包含 API Key 等凭据，跨 origin 时一并移除。
+      const configuredNames = new Set(Object.keys(this.config.requestHeaders).map((key) => key.toLowerCase()));
+      for (const key of Object.keys(headers)) {
+        if (configuredNames.has(key.toLowerCase())) {
+          delete headers[key];
+        }
+      }
+    }
     if (extra) {
       Object.assign(headers, extra);
     }
-    const present = new Set(Object.keys(headers).map((key) => key.toLowerCase()));
-    const auth = await this.session.sessionHeaders();
-    for (const [key, value] of Object.entries(auth)) {
-      if (!present.has(key.toLowerCase())) {
-        headers[key] = value;
+    if (sendCredentials) {
+      const present = new Set(Object.keys(headers).map((key) => key.toLowerCase()));
+      const auth = await this.session.sessionHeaders();
+      for (const [key, value] of Object.entries(auth)) {
+        if (!present.has(key.toLowerCase())) {
+          headers[key] = value;
+        }
       }
     }
     return headers;
+  }
+
+  private isEndpointOrigin(url: string): boolean {
+    try {
+      return new URL(url).origin === new URL(this.config.endpoint).origin;
+    } catch {
+      return false;
+    }
   }
 
   private async requestRaw(
@@ -125,10 +145,12 @@ export class HttpOjClient implements OjClient {
     if (init.contentType && !init.formData) {
       extra['Content-Type'] = init.contentType;
     }
+    const sameOrigin = this.isEndpointOrigin(url);
     const headers = await this.headers(
       init.referer,
       Object.keys(extra).length > 0 ? extra : undefined,
       init.navigation === true,
+      sameOrigin,
     );
     if (init.accept) {
       headers['Accept'] = init.accept;
@@ -143,7 +165,7 @@ export class HttpOjClient implements OjClient {
         }
       }
     }
-    if (init.extraHeaders) {
+    if (init.extraHeaders && sameOrigin) {
       Object.assign(headers, init.extraHeaders);
     }
     lastSentHeaders = { ...headers };
@@ -172,7 +194,10 @@ export class HttpOjClient implements OjClient {
     }
 
     // 有些 OJ 每次请求都会刷新 session cookie，不跟上就会掉登录。
-    this.session.absorbCookies(response);
+    // 其它 origin 的响应不可信，绝不允许它改写已保存的会话。
+    if (sameOrigin) {
+      this.session.absorbCookies(response);
+    }
 
     // 登录态失效：服务端 302 回登录页。
     if (this.isSessionExpiredRedirect(response, url)) {
@@ -238,7 +263,13 @@ export class HttpOjClient implements OjClient {
     let next: string;
     try {
       next = new URL(location, url).toString();
-    } catch {
+      if (new URL(next).origin !== new URL(url).origin) {
+        throw new OjError(`已阻止跨站重定向：${url} → ${next}`, undefined, response.status);
+      }
+    } catch (error) {
+      if (error instanceof OjError) {
+        throw error;
+      }
       return response;
     }
 
