@@ -23,3 +23,6 @@ dump_requests.log
 *.pem
 *.key
 .npmrc
+
+# 运行时产物：扩展把下载的题面存到 <工作区>/problems/，属于本地数据
+problems/**

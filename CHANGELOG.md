@@ -1,7 +1,20 @@
 # 更新日志
 
 本项目的重要变更记录。版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)；
-`0.0.x` 阶段配置项与内部结构仍可能变动。
+`0.x` 阶段配置项与内部结构仍可能变动。
+
+## 0.1.0
+
+首个公开发布的版本，功能与 `0.0.27` 一致，主要是为发布到 VS Code 扩展市场做准备。
+
+### 变更
+
+- 版本号从 `0.0.27` 提升到 `0.1.0`；扩展 ID 固定为 `Terabinaryte.xdoj-vscode`。
+- 补齐扩展市场元数据：`repository` / `homepage` / `bugs`，以及 128×128 的 `media/icon.png`。
+- 同步 `package-lock.json` 里的版本号（此前停留在 `0.0.22`）。
+- `.vscodeignore` 排除 `problems/**`，避免把工作区里下载的题面文件打进扩展包。
+- `npm run package` 不再需要 `--allow-missing-repository`；新增 `npm run publish`。
+- README 增加从扩展市场安装的方式，以及维护者发布命令。
 
 ## 0.0.27
 

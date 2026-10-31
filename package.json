@@ -2,12 +2,21 @@
   "name": "xdoj-vscode",
   "displayName": "XDOJ",
   "description": "在 VS Code 里刷 OJ：题目列表、题面预览（PDF / DOCX / TXT）、一键提交 cpp、提交状态",
-  "version": "0.0.27",
+  "version": "0.1.0",
   "publisher": "Terabinaryte",
   "author": {
     "name": "Terabinaryte"
   },
   "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Terabinaryte/xdoj-vscode.git"
+  },
+  "homepage": "https://github.com/Terabinaryte/xdoj-vscode#readme",
+  "bugs": {
+    "url": "https://github.com/Terabinaryte/xdoj-vscode/issues"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -698,7 +707,8 @@
     "typecheck": "tsc -p . --noEmit",
     "smoke": "node scripts/smoke-test.mjs",
     "verify": "npm run typecheck && npm run build && npm run smoke",
-    "package": "npm run build && npx vsce package --no-dependencies --allow-missing-repository",
+    "package": "npm run build && npx vsce package --no-dependencies",
+    "publish": "npx vsce publish --no-dependencies",
     "postinstall": "node scripts/copy-pdfjs.mjs"
   },
   "devDependencies": {

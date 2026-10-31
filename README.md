@@ -35,7 +35,14 @@
 
 ### 1. 安装
 
-从 `.vsix` 安装：
+在 VS Code 的扩展视图（`Ctrl+Shift+X`）里搜索 **XDOJ**，或直接按扩展 ID 安装：
+
+```bash
+code --install-extension Terabinaryte.xdoj-vscode
+```
+
+也可以从 [GitHub Releases](https://github.com/Terabinaryte/xdoj-vscode/releases)
+下载 `.vsix` 后安装：
 
 ```bash
 code --install-extension xdoj-vscode-<版本>.vsix
@@ -153,6 +160,7 @@ npm run typecheck # 仅类型检查
 npm run smoke     # 冒烟测试（用 vscode API 桩跑真实编译产物）
 npm run verify    # typecheck + build + smoke
 npm run package   # 打包 .vsix
+npm run publish   # 发布到 VS Code 扩展市场（需先 npx vsce login Terabinaryte）
 ```
 
 在 VS Code 里打开本目录按 `F5` 即启动扩展开发宿主。
